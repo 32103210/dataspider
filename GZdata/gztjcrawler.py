@@ -107,11 +107,14 @@ for k in range(len(find)):
     url_nj ="http://data.gzstats.gov.cn/gzStat1/yearqueryAction.do?method=det_Title&flId=%s&flname=%s&title=%s&fbDate=%s&falg=%s&year=%s"%(flId[k],flname[k],title[k],fbDate[k],falg[k],year[k])
     print(url_nj)
     dirpath = 'E:\oubin\GZdata\%s' % fbDate[k]
-    os.mkdir(dirpath)
+    if not os.path.exists(dirpath):
+        os.mkdir(dirpath)
     try:
         nj_html = httpRequest(url_nj, header)
     except:
         print(url_nj+ "页面超时")
+    if nj_html == None:
+        continue
     nj_text = BeautifulSoup(nj_html.text, 'lxml')
     findtitle = nj_text.select('a')
     # [<a onclick="selectDlist('64864','TJ_RPT_400165139747601058','1-1  行政区划','2016-12-06/第一篇、综合','5140');">
@@ -136,14 +139,17 @@ for k in range(len(find)):
     for fid, rptid, rptname, fltitle in zip(FID, RPTID, RPTNAME, FLTITLE):
         url_table = "http://data.gzstats.gov.cn/gzStat1/yearqueryAction.do?method=displayRpt&ACTFLAG=3&FID=%s&RPTID=%s&RPTNAME=%s&FLTITLE=%s" % (fid, rptid, rptname, fltitle)
         try:
+            csvPath = 'E:\oubin\GZdata\%s\%s.csv' % (fbDate[k], rptname)
+            if os.path.exists(csvPath):
+                continue
             html_table = httpRequest(url_table, header)
+            table_text = BeautifulSoup(html_table.text, 'lxml')
+            tableData = TableDataProcess(table_text, name=rptname)
+
+            tableData.to_csv(path_or_buf=csvPath)
         except:
             print(url_table + "请求超时")
-        table_text = BeautifulSoup(html_table.text, 'lxml')
 
-        tableData = TableDataProcess(table_text, name= rptname)
-        csvPath = 'E:\oubin\GZdata\%s\%s'% (fbDate[k],rptname)
-        tableData.to_csv(path_or_buf= csvPath)
 
 
 

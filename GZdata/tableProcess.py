@@ -866,5 +866,5 @@ soup = BeautifulSoup(html, 'lxml')
 
 table = TableDataProcess(soup, 'test')
 
-print(table)
+table.to_csv("test.csv")
 
